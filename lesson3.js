@@ -92,15 +92,108 @@ console.log(sum(1,2,5,8));
 // - Create a closure that keeps track of a counter and has methods 
 // to increment, decrement, and get the current value.
 
-function counter1(){
-    let currentVal = 0;
 
+//Here we create a const , and make it equal to a function.
+//this way we will create a private variable inside the function,
+//that will not be able to access without using the const var.
+const counter_method = function(){
+    //This will not run every time we run the function.
+    //Here is like instanciating it for the first time.
+    //Changes happen in the second function we return!
+    let counter = 0;
+
+    return function getCurrentValue(arg){
+        switch (arg){
+            case "increment":
+                return ++counter;
+
+            case "decrement":
+                return --counter;
+            
+            default:
+                return counter;
+            }
+    }
 }
+method1 = counter_method();
 
-outerFunction().secretFunction;
+console.log(method1());//0
+method1("increment");
+method1("increment");
+console.log(method1());
+method1("decrement");
+method1("decrement");
+method1("decrement");
+method1("decrement");
+console.log(method1());
 
 // Use map, filter, and reduce to transform an array of numbers:
 // - Double each number using map.
 // - Filter out numbers less than 10.
 // - Calculate the sum of the remaining numbers using reduce
 
+//Double array results
+let array1 = [1,2,6,4,6];
+array1 = array1.map(n => {
+    return n*2
+});
+console.log(array1);
+
+//Filter lessThan10 results from array
+// function lessThan10(value){
+//     if (value < 10){
+//         return value;
+//     }
+// }
+// array1 = array1.filter(lessThan10);
+// or
+array1 = array1.filter(n =>{
+    if (n < 10){
+        return n;
+    }
+});
+console.log(array1);
+
+
+// Sum array elements and return result.
+
+// function sumArray(arr){
+//     let sumResult = 0;
+
+//     for(let n of arr){
+//         sumResult += n;
+//     }
+//     return sumResult;
+// }
+
+
+// .reduce function
+// ---------------------------------------------
+// array.reduce((accumulator, currentValue) => {
+//     // Function logic
+//   }, initialValue);
+// ---------------------------------------------
+// The above, or:
+array1 = array1.reduce((accumulator, currentVal) =>{
+    return accumulator + currentVal;
+}, 0);
+console.log(array1);
+
+// so, here what happens:
+// accumulator, has starting value (optional) of 0, (initialValue).
+// for each element in the array1:
+    // we add accumulator(0) and the element of the array1.
+    // We do that for all the elements of the array.
+    // then we return the result.
+
+const cart = [
+    { item: "Book", price: 10 },
+    { item: "Pen", price: 2 },
+    { item: "Notebook", price: 5 }
+  ];
+  
+  const totalPrice = cart.reduce((total, product) =>{
+    return total + product.price;
+    }, 0);
+
+console.log(totalPrice);
