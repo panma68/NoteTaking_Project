@@ -23,6 +23,6 @@ export function mul(a,b){
 
 
 // Here we will export these functions
-module.exports = {add};
+module.exports = { add };
     
 
