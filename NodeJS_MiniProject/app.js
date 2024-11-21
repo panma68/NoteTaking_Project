@@ -20,7 +20,6 @@ function Note(title,body){
 }
 
 var noteObject = {
-    idCounter:0,
     table: []
 };
 
@@ -38,12 +37,9 @@ function addNote(noteToAdd){
             
             // Calculate json size (to make another if it needs creation)
             console.log(textEncoder.encode(data).length);
-
-            console.log("ID_COUNTER: "+noteObj.idCounter);
-            // Add content to json object
-            noteObj.table.push({id: noteObj.idCounter, title: noteToAdd.title,body: noteToAdd.body});
             
-            noteObj.idCounter++;
+            // Add content to json object
+            noteObj.table.push({id: Date.now(), title: noteToAdd.title,body: noteToAdd.body});
 
             let json = JSON.stringify(noteObj);
             
@@ -64,7 +60,7 @@ function addNote(noteToAdd){
 // addNote(note);
 
 
-function deleteNote(noteID){
+function deleteNote(noteIdToDelete){
     fs.readFile(notesJsonPath,"utf-8", (err,data) => {
         if (err){
             throw err;
@@ -73,56 +69,48 @@ function deleteNote(noteID){
         else{
 
             let noteObj = JSON.parse(data);
-            let foundID = false;
-
-            console.log("Start search..");
-
+        
             for(let i = 0; i < noteObj.table.length; i++){
 
-                console.log(noteObj.table[i])
+                // Match found.
+                if(noteObj.table[i]["id"] == noteIdToDelete){
 
-                if(noteObj.table[i]["id"] == noteID){
-                    // noteObj.table.splice
-                    foundID = true;
-                    break;
+                    const newArray = noteObj.table.splice(i,1);
+
+                    let json = JSON.stringify(noteObj);
+            
+                    // Write the json object back to the .json file.
+                    fs.writeFile(notesJsonPath,json,(err)=>{
+                        if(err) throw err;
+                        console.log("Saved to notes.json!");
+                    })
+
+                    return;
                 }
             }
 
-            if(foundID){
-                console.log("Found id: " + noteID+".");
-            }
-            else{
-                console.log("noteID not found.");
-            }
-            // noteObj.table["id"]
-            // console.log(noteObj.table["id"] == noteID)
+            // No match found.
+            console.log("noteID not found.");
+
         }
     });   
 }
-
-
 
 function notesList(){
     fs.readFile(notesJsonPath,"utf-8", (err,data) => {
         if (err){
             throw err;
         }
-        
         else{
-
             let noteObj = JSON.parse(data);
-            
-            console.log("noteObj: "+noteObj);
             console.log(noteObj);
+
         }
     });   
 }
 
-// Argv Control
-console.log("num of args: " + args.length);
 
 // Control
-
 if(args[0].endsWith("node.exe") && args[1].endsWith("app.js")){
         
     switch(args[2]){
@@ -158,13 +146,11 @@ if(args[0].endsWith("node.exe") && args[1].endsWith("app.js")){
                 
             }
                 
-            case "list":
-                notesList();
-                break;
+        case "list":
+            notesList();
+            break;
         }
 
             
     }
-    
 
-deleteNote(3);
