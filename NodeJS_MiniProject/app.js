@@ -4,7 +4,6 @@ const process = require("process");
 
 const args = process.argv;
 
-
 const notesJsonPath = __dirname + "\\notes.json";
 
 // To read json file size.
@@ -38,6 +37,13 @@ function addNote(noteToAdd){
             // Calculate json size (to make another if it needs creation)
             console.log(textEncoder.encode(data).length);
             
+            for(let i = 0; i < noteObj.table.length; i++){
+                if(noteToAdd.title == noteObj.table[i].title){
+                    console.log(`Dublicate title: "${noteObj.table[i].title}"\nNote ID: "${noteObj.table[i].id}"`);
+                    return;
+                }
+            }
+
             // Add content to json object
             noteObj.table.push({id: Date.now(), title: noteToAdd.title,body: noteToAdd.body});
 
@@ -46,19 +52,13 @@ function addNote(noteToAdd){
             // Write the json object back to the .json file.
             fs.writeFile(notesJsonPath,json,(err)=>{
                 if(err) throw err;
-                console.log("Saved to notes.json!");
+                console.log("note saved..");
             })
 
         }
         
     });    
 }
-
-
-// Add funcs
-// var note = new Note(1,"ADADWDWA","133444444444444444444444444.");
-// addNote(note);
-
 
 function deleteNote(noteIdToDelete){
     fs.readFile(notesJsonPath,"utf-8", (err,data) => {
@@ -82,7 +82,7 @@ function deleteNote(noteIdToDelete){
                     // Write the json object back to the .json file.
                     fs.writeFile(notesJsonPath,json,(err)=>{
                         if(err) throw err;
-                        console.log("Saved to notes.json!");
+                        console.log("note deleted...");
                     })
 
                     return;
@@ -109,6 +109,35 @@ function notesList(){
     });   
 }
 
+function searchNotes(noteTitle){
+    fs.readFile(notesJsonPath,"utf-8", (err,data) => {
+        if (err){
+            throw err;
+        }
+        
+        else{
+
+            let noteObj = JSON.parse(data);
+            let searchArr = [];
+
+            for(let i = 0; i < noteObj.table.length; i++){
+
+                // Match found.
+                if(noteObj.table[i].title.match(noteTitle)){
+                    searchArr.push(noteObj.table[i]);
+                }
+            }
+
+            if(searchArr.length > 0){
+                console.log(searchArr);
+            }
+            else{
+            // No match found.
+            console.log("Note Title not found.");
+            }   
+        }
+    });
+}
 
 // Control
 if(args[0].endsWith("node.exe") && args[1].endsWith("app.js")){
@@ -145,12 +174,21 @@ if(args[0].endsWith("node.exe") && args[1].endsWith("app.js")){
                 }
                 
             }
+
+        case "search":
+            if(args[3] == undefined){
+                console.log("arguement[3] does not exist.");
+                break;
+            }
+            else
+            {   
+                searchNotes(args[3]);
+                break;
+            }
                 
         case "list":
             notesList();
             break;
-        }
-
-            
+        }   
     }
 
