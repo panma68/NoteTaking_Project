@@ -28,45 +28,45 @@ var noteObject = {
 function addNote(noteToAdd) {
 
     return fs.readFile(notesJsonPath, "utf-8")
-    .then(data=>{
-        
-        let noteObj = JSON.parse(data);
+        .then(data => {
 
-        // Calculate json size (to make another if it needs creation)
-        // console.log(textEncoder.encode(data).length);
+            let noteObj = JSON.parse(data);
 
-        for (let i = 0; i < noteObj.table.length; i++) {
-            if (noteToAdd.title == noteObj.table[i].title) {
-                return `Cannot save due to existing title in notes file.\nDublicate title: "${noteObj.table[i].title}"\nNote ID: "${noteObj.table[i].id}"`;
+            // Calculate json size (to make another if it needs creation)
+            // console.log(textEncoder.encode(data).length);
+
+            for (let i = 0; i < noteObj.table.length; i++) {
+                if (noteToAdd.title == noteObj.table[i].title) {
+                    return `Cannot save due to existing title in notes file.\nDublicate title: "${noteObj.table[i].title}"\nNote ID: "${noteObj.table[i].id}"`;
+                }
             }
-        }
 
-        // Add content to json object
-        noteObj.table.push({ id: Date.now(), title: noteToAdd.title, body: noteToAdd.body });
+            // Add content to json object
+            noteObj.table.push({ id: Date.now(), title: noteToAdd.title, body: noteToAdd.body });
 
-        let json = JSON.stringify(noteObj);
+            let json = JSON.stringify(noteObj);
 
-        // Write the json object back to the .json file.
-        return fs.writeFile(notesJsonPath, json)
-        .then(()=>{
-            return "note saved";
+            // Write the json object back to the .json file.
+            return fs.writeFile(notesJsonPath, json)
+                .then(() => {
+                    return "note saved";
+                })
+                .catch(() => {
+                    return "problem during saving the file to the json.";
+                })
+
         })
-        .catch(()=>{
-            return "problem during saving the file to the json.";
+        .catch(() => {
+            return "error upon accessing the file";
         })
-            
-    })
-    .catch(()=>{
-        return "error upon accessing the file";
-    })
 }
 
 function deleteNote(noteIdToDelete) {
-    
-    return fs.readFile(notesJsonPath, "utf-8")
-    .then(data => {
 
-        let noteObj = JSON.parse(data);
+    return fs.readFile(notesJsonPath, "utf-8")
+        .then(data => {
+
+            let noteObj = JSON.parse(data);
 
             for (let i = 0; i < noteObj.table.length; i++) {
 
@@ -79,33 +79,33 @@ function deleteNote(noteIdToDelete) {
 
                     // Write the json object back to the .json file.
                     return fs.writeFile(notesJsonPath, json)
-                    .then(()=>{
-                        return "note deleted..";
-                    })
-                    .catch(()=>{
-                        return "(note id found..) error writing json to file..";
-                    })   
+                        .then(() => {
+                            return "note deleted..";
+                        })
+                        .catch(() => {
+                            return "(note id found..) error writing json to file..";
+                        })
+                }
             }
-        }
-        return "note id not found..";
-    })
-    .catch(()=>{
-        return "wrongly passed args";
-    });
+            return "note id not found..";
+        })
+        .catch(() => {
+            return "wrongly passed args";
+        });
 
 }
 
 function notesList() {
-    
+
     return fs.readFile(notesJsonPath)
 
-    .then(data=>{
-        let noteObj = JSON.parse(data);
-        return noteObj;
-    })
-    .catch(err =>{
-        return err;
-    })
+        .then(data => {
+            let noteObj = JSON.parse(data);
+            return noteObj;
+        })
+        .catch(err => {
+            return err;
+        })
 }
 
 function searchNotes(noteTitle) {
@@ -113,7 +113,7 @@ function searchNotes(noteTitle) {
     noteTitle = noteTitle.toLowerCase();
 
     return fs.readFile(notesJsonPath, "utf-8")
-        .then(data =>{
+        .then(data => {
 
             let noteObj = JSON.parse(data);
             let searchArr = [];
@@ -136,11 +136,11 @@ function searchNotes(noteTitle) {
             }
 
         })
-        .catch(err =>{
+        .catch(err => {
             return err;
         })
-    }
-            
+}
+
 
 // Control
 if (args[0].endsWith("node.exe") && args[1].endsWith("app.js")) {
@@ -153,12 +153,12 @@ if (args[0].endsWith("node.exe") && args[1].endsWith("app.js")) {
             }
             else {
                 addNote(new Note(args[3], args[4]))
-                .then(res=>{
-                    console.log(res);
-                })
-                .catch(err=>{
-                    console.log(err);
-                })
+                    .then(res => {
+                        console.log(res);
+                    })
+                    .catch(err => {
+                        console.log(err);
+                    })
                 break;
             }
 
@@ -170,22 +170,17 @@ if (args[0].endsWith("node.exe") && args[1].endsWith("app.js")) {
             else {
                 let indexToDelete = Number(args[3]);
 
-                if (isNaN(indexToDelete)) {
-                    console.log("Please provide an integer, provided arg: " + args[3]);
-                    break;
-                }
-                else {
-                    deleteNote(indexToDelete)
-                    .then(res=>{
+                deleteNote(indexToDelete)
+                    .then(res => {
+                        console.log("result .then(res=>{...});")
                         console.log(res);
                     })
-                    .catch(err=>{
+                    .catch(err => {
+                        console.log("error here.");
                         console.log(err);
                     });
-                    break;
-                }
-
             }
+            break;
 
         case "search":
             if (args[3] == undefined) {
@@ -195,26 +190,26 @@ if (args[0].endsWith("node.exe") && args[1].endsWith("app.js")) {
             else {
 
                 searchNotes(args[3])
-                .then(searchResult =>{
-                    console.log(searchResult);
-                })
-                .catch(err =>{
-                    console.log(err);
-                });
+                    .then(searchResult => {
+                        console.log(searchResult);
+                    })
+                    .catch(err => {
+                        console.log(err);
+                    });
 
                 break;
             }
 
         case "list":
             notesList()
-            .then(data => {
-                console.log(data);
-            })
-            .catch(err =>{
-                console.log(err);
-            })
+                .then(data => {
+                    console.log(data);
+                })
+                .catch(err => {
+                    console.log(err);
+                })
             break;
     }
 }
 
-module.exports = { addNote, notesList, deleteNote, searchNotes };
+module.exports = { addNote, notesList, deleteNote, searchNotes, Note };

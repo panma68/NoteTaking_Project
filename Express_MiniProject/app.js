@@ -1,17 +1,26 @@
 const express = require('express');
 const app = express();
 const fs = require("fs").promises;
-const { notesList, deleteNote } = require('./notes_app');
+
+const { notesList, deleteNote, addNote, Note } = require('./notes_app');
+
+const { error } = require('console');
 
 const PORT = 3000;
 
 // Paths
 const NOTES_PATH = __dirname + "/notes.json";
 
-app.use((req,res,next)=>{
+
+// APP.USE CASES.
+// to read json post.
+app.use(express.json());
+
+app.use((req, res, next)=>{
     console.log(`${req.method} ${req.path}`);
     next();
 })
+// END OF APP.USE CASES.
 
 app.get("/", (req,res) => {
     
@@ -19,24 +28,6 @@ app.get("/", (req,res) => {
     res.send("Succesfull");
 
 })
-
-// Delete note by id
-app.delete("/notes/:id",(req,res) =>{
-    let noteIdToDelete = req.params.id;
-
-    console.log(noteIdToDelete);
-    
-    deleteNote(noteIdToDelete)
-    .then(res=>{
-        req.status(200);
-        req.send(res);
-    })
-    .catch(err=>{
-        req.status(400);
-        req.send(err);
-    })
-
-});
 
 app.get("/notes", (req,res) => {
     
@@ -52,6 +43,49 @@ app.get("/notes", (req,res) => {
 
 });
 
+// Delete note by id
+app.delete("/notes/:id",(req,res) =>{
+
+    let noteIdToDelete = req.params.id;
+
+    console.log("noteIdToDelete:",noteIdToDelete);
+    
+    deleteNote(noteIdToDelete)
+    .then(result => {
+        res.status(200).send(result);
+    })
+    .catch(err => {
+        res.status(400).send(err);
+    });
+
+});
+
+
+// POST a note
+
+app.post("/notes", (req,res) =>{
+    try{
+        if(req.body.title == undefined || req.body.body == undefined) {
+            throw "req.body.title or req.body.body not defined";
+        }
+        console.log(req.body.title, req.body.body);
+        addNote(new Note(req.body.title, req.body.body))
+                    .then((result) => {
+                        res.status(200).json({title: req.body.title, body: req.body.body, status: `200 ${result}`});
+                    })
+                    .catch(error => {
+                        res.status(500).json({message:error, status: 500})
+                    })
+
+        // res.status(200).json({title: req.body.title, body: req.body.body, status: 200});
+    }
+    catch(err){
+        res.status(500).json({message:err, status: 500});
+    }
+
+    // console.log(resultJson.title,resultJson.body);
+    // res.status(200).send(resultJson);
+})
 
 app.listen(PORT, (error) =>{
     if(!error)
