@@ -24,42 +24,76 @@ var noteObject = {
     table: []
 };
 
-// Add note to js
-function addNote(noteToAdd) {
 
-    return fs.readFile(notesJsonPath, "utf-8")
-        .then(data => {
+// returns a list[0] for true,false and undefined result. list[1] for result message.
+// list[0] == true for found duplicate.
+// list[0] == false for no duplicate title.
+// list[0] == undefined for problem with reading file.
 
-            let noteObj = JSON.parse(data);
+async function findTitleDuplicate(noteTitle){
+    try{
 
-            // Calculate json size (to make another if it needs creation)
-            // console.log(textEncoder.encode(data).length);
-
-            for (let i = 0; i < noteObj.table.length; i++) {
-                if (noteToAdd.title == noteObj.table[i].title) {
-                    return `Cannot save due to existing title in notes file.\nDublicate title: "${noteObj.table[i].title}"\nNote ID: "${noteObj.table[i].id}"`;
-                }
+        const data = await fs.readFile(notesJsonPath, "utf-8");
+        const noteObj = JSON.parse(data);
+    
+        for (let i = 0; i < noteObj.table.length; i++) {
+            if (noteTitle == noteObj.table[i].title) {
+                return [true,`Cannot save due to existing title in notes file.\nDublicate title: "${noteObj.table[i].title}"\nNote ID: "${noteObj.table[i].id}"`];
             }
+        }
 
+        return [false,"No duplicate title found"];
+    }
+
+    catch(error){
+            console.error("Error reading file in findTitleDuplicate",error);
+            return [undefined,"Error reading file in findTitleDuplicate"];
+        }
+
+    }
+
+
+// addNote(new Note("SomeTitle","sometect"))
+// .then(res=>{console.log(res);})
+// .catch(err=>{console.log(err,12);})
+
+// Add note to js
+async function addNote(noteToAdd) {
+    
+    try{
+        const data = await fs.readFile(notesJsonPath,"utf-8");
+        let noteObj = JSON.parse(data);
+        const [isDuplicate,message] = await findTitleDuplicate(noteToAdd.title);
+
+        if(isDuplicate == false){
+            // Set Note ID.
+            newNoteID = Date.now();
+            noteToAdd.id = newNoteID;
+   
             // Add content to json object
-            noteObj.table.push({ id: Date.now(), title: noteToAdd.title, body: noteToAdd.body });
-
-            let json = JSON.stringify(noteObj);
-
+            noteObj.table.push({ id: noteToAdd.id, title: noteToAdd.title, body: noteToAdd.body });
+   
+            // noteObj to write to file, null and 2 to prettify.
+            let json = JSON.stringify(noteObj, null, 2);
+            
             // Write the json object back to the .json file.
-            return fs.writeFile(notesJsonPath, json)
-                .then(() => {
-                    return "note saved";
-                })
-                .catch(() => {
-                    return "problem during saving the file to the json.";
-                })
+            await fs.writeFile(notesJsonPath, json);
 
-        })
-        .catch(() => {
-            return "error upon accessing the file";
-        })
+            return "note saved!";
+        }
+
+        else{
+            // Error relating to findTitleDublicate().
+            return message;
+        }
+
+    }
+    catch(err){
+        console.error("Error while reading file in addNote",err);
+        return "Error while reading file in addNote";
+    }    
 }
+
 
 function deleteNote(noteIdToDelete) {
 
@@ -73,8 +107,8 @@ function deleteNote(noteIdToDelete) {
                 // Match found.
                 if (noteObj.table[i]["id"] == noteIdToDelete) {
 
-                    const newArray = noteObj.table.splice(i, 1);
-
+                    // const newArray = noteObj.table.splice(i, 1);
+                    noteObj.table.splice(i, 1);
                     let json = JSON.stringify(noteObj);
 
                     // Write the json object back to the .json file.
@@ -141,6 +175,44 @@ function searchNotes(noteTitle) {
         })
 }
 
+function updateNoteById(noteID,newNote){
+
+    return fs.readFile(notesJsonPath, "utf-8")
+    .then(data=>{
+
+        let noteObj = JSON.parse(data);
+
+        for (let i = 0; i < noteObj.table.length; i++) {
+
+            // Match found.
+            if (noteObj.table[i]["id"] == noteID){
+                
+                // Change Title and Body of Note.
+                noteObj.table[i].title = newNote.title;
+                noteObj.table[i].body = newNote.body;
+                // Update new Note id to old note's id.
+                newNote.id = noteObj.table[i].id;
+
+                let json = JSON.stringify(noteObj);
+
+                return fs.writeFile(notesJsonPath,json)
+                .then(()=>{
+                    return "note updated!"
+                })
+                .catch(()=>{
+                    return "problem when writing to file"
+                })
+            }
+        }
+
+    })
+    .catch(()=>{
+        return "problem when reading file";
+    })
+
+    
+}
+
 
 // Control
 if (args[0].endsWith("node.exe") && args[1].endsWith("app.js")) {
@@ -172,11 +244,9 @@ if (args[0].endsWith("node.exe") && args[1].endsWith("app.js")) {
 
                 deleteNote(indexToDelete)
                     .then(res => {
-                        console.log("result .then(res=>{...});")
                         console.log(res);
                     })
                     .catch(err => {
-                        console.log("error here.");
                         console.log(err);
                     });
             }

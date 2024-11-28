@@ -61,14 +61,13 @@ app.delete("/notes/:id",(req,res) =>{
 });
 
 
-// POST a note
-
+// POST a note to the notes.
 app.post("/notes", (req,res) =>{
     try{
         if(req.body.title == undefined || req.body.body == undefined) {
             throw "req.body.title or req.body.body not defined";
         }
-        console.log(req.body.title, req.body.body);
+
         addNote(new Note(req.body.title, req.body.body))
                     .then((result) => {
                         res.status(200).json({title: req.body.title, body: req.body.body, status: `200 ${result}`});
@@ -76,16 +75,21 @@ app.post("/notes", (req,res) =>{
                     .catch(error => {
                         res.status(500).json({message:error, status: 500})
                     })
-
-        // res.status(200).json({title: req.body.title, body: req.body.body, status: 200});
     }
     catch(err){
         res.status(500).json({message:err, status: 500});
     }
 
-    // console.log(resultJson.title,resultJson.body);
-    // res.status(200).send(resultJson);
 })
+
+// Put (update) note by noteID.
+app.put("/notes/:id", (req,res) => {
+    let noteIdToUpdate = req.params.id;
+
+    updateNoteById(noteID,new Note(req.body.title, req.body.title))
+
+})
+
 
 app.listen(PORT, (error) =>{
     if(!error)
