@@ -27,6 +27,7 @@ var noteObject = {
 
 // General search matching of elements in notes.json 
 // HARDCODED ELEMENTS.
+// returns : [isDuplicate(true/false/undefined),index,message]
 const noteStructureElements = ["id","title","body"];
 async function findDuplicateInNoteStructure(elementToSearch,noteElement){
     
@@ -68,10 +69,6 @@ async function findDuplicateInNoteStructure(elementToSearch,noteElement){
     }
 
 
-
-// addNote(new Note("SomeTitle","sometect"))
-// .then(res=>{console.log(res);})
-// .catch(err=>{console.log(err,12);})
 
 // Add note to js
 async function addNote(noteToAdd) {
@@ -123,7 +120,7 @@ try{
 
         console.log(index);
         noteObj.table.splice(index, 1);
-        let json = JSON.stringify(noteObj);
+        let json = JSON.stringify(noteObj, null, 2);
 
         // Write the json object back to the .json file.
         await fs.writeFile(notesJsonPath, json)
@@ -194,48 +191,38 @@ async function updateNoteById(noteID,newNote){
     try{
     
         const data = await fs.readFile(notesJsonPath, "utf-8");
-    
+        const noteObj = JSON.parse(data);
+
+        console.log("inside updateNoteById",noteID ,newNote.info())
+
+        const [isDuplicate,index,message] = await findDuplicateInNoteStructure("id",noteID);
+        if(isDuplicate){
+
+            // Update note ID title and body.
+            noteObj.table[index]["title"] = newNote.title;
+            noteObj.table[index]["body"] = newNote.body;
+        
+            let json = JSON.stringify(noteObj, null, 2);
+            await fs.writeFile(notesJsonPath, json);
+            
+            return `note update with id ${noteID} sucessful!`;
+        }
+
     }
 
     catch(err){
-        return err;
+        return `1]${err}, and 2]${message}`;
     }
 }
-//     .then(data=>{
 
-//         let noteObj = JSON.parse(data);
 
-//         for (let i = 0; i < noteObj.table.length; i++) {
-
-//             // Match found.
-//             if (noteObj.table[i]["id"] == noteID){
-                
-//                 // Change Title and Body of Note.
-//                 noteObj.table[i].title = newNote.title;
-//                 noteObj.table[i].body = newNote.body;
-//                 // Update new Note id to old note's id.
-//                 newNote.id = noteObj.table[i].id;
-
-//                 let json = JSON.stringify(noteObj);
-
-//                 return fs.writeFile(notesJsonPath,json)
-//                 .then(()=>{
-//                     return "note updated!"
-//                 })
-//                 .catch(()=>{
-//                     return "problem when writing to file"
-//                 })
-//             }
-//         }
-
-//     })
-//     .catch(()=>{
-//         return "problem when reading file";
-//     })
-
-    
-// }
-
+// updateNoteById(1732530520141 ,new Note("some112", "12312333-132-12312-31-23--"))
+// .then(res=>{
+//     console.log(res);
+// })
+// .catch(err=>{
+//     console.log(err);
+// })
 
 // Control
 if (args[0].endsWith("node.exe") && args[1].endsWith("app.js")) {
@@ -305,4 +292,4 @@ if (args[0].endsWith("node.exe") && args[1].endsWith("app.js")) {
     }
 }
 
-module.exports = { addNote, notesList, deleteNote, searchNotes, Note };
+module.exports = { updateNoteById ,addNote, notesList, deleteNote, searchNotes, Note };
