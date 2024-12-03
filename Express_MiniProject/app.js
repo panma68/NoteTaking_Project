@@ -63,23 +63,25 @@ app.delete("/notes/:id", (req, res) => {
 
 
 // POST a note to the notes.
-app.post("/notes", (req, res) => {
-    try {
-        if (req.body.title == undefined || req.body.body == undefined) {
-            throw "req.body.title or req.body.body not defined";
-        }
+// body check and title check before adding note , using middleware.
+app.post("/notes",(req,res,next)=>{
 
-        addNote(new Note(req.body.title, req.body.body))
+    if (req.body.title == undefined || req.body.body == undefined) {
+        res.status(500).send("req.body.title or req.body.body not defined");
+    }
+    else{
+        next()
+    }
+
+}, (req,res)=>{
+
+    addNote(new Note(req.body.title, req.body.body))
             .then((result) => {
                 res.status(200).json({ title: req.body.title, body: req.body.body, status: `200 ${result}` });
             })
             .catch(error => {
                 res.status(500).json({ message: error, status: 500 })
             })
-    }
-    catch (err) {
-        res.status(500).json({ message: err, status: 500 });
-    }
 
 })
 
@@ -87,8 +89,6 @@ app.post("/notes", (req, res) => {
 app.put("/notes/:id", (req, res) => {
 
     const noteIdToUpdate = req.params.id;
-    console.log(noteIdToUpdate);
-    console.log(req.body.title, req.body.title);
     
     updateNoteById(noteIdToUpdate, new Note(req.body.title, req.body.title))
     .then(result => { res.status(200).send(result); })
