@@ -14,6 +14,21 @@ It has simple functionallity like:
 3. Search note. (with title name).
 4. List all notes.
 
-Usage example. (in the command-line):
+**Command-line** usage example:
+-
+<img src="https://github.com/user-attachments/assets/2fa6a02b-2ca8-48f5-a99f-8191791901a7" width="600" height="400" />
 
-<img src="https://github.com/user-attachments/assets/7e56a393-4934-415b-a037-9d39e01f4a6c" width="600" height="400" />
+**API** usage example:
+-
+- Add note:
+
+**POST /notes**
+
+In the body of POST, format the note like so to add it.
+
+```json
+{
+    "title":"note title",
+    "body": "note content"
+}
+```
