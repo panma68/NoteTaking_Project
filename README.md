@@ -11,8 +11,9 @@ The notes are saved in a json called **notes.json**.
 It has simple functionallity like:
 1. Add note.
 2. Delete note. (with ID).
-3. Search note. (with title name).
+3. Search note. (with title name, will return all notes that match the substring of the search value).
 4. List all notes.
+5. Update note.()
 
 **Command-line** usage example:
 -
@@ -20,11 +21,11 @@ It has simple functionallity like:
 
 **API** usage example:
 -
-- Add note:
+### [Add note] ###
 
 **POST /notes**
 
-In the body of POST, format the note like so to add it.
+In the body of POST, add the payload like so:
 
 ```json
 {
@@ -32,3 +33,15 @@ In the body of POST, format the note like so to add it.
     "body": "note content"
 }
 ```
+
+### [Delete note] ###
+
+**DELETE /notes/noteId**
+
+### [Search note] ###
+
+**GET /notes/noteTitle**
+
+### [List all notes] ###
+
+**GET /notes**
