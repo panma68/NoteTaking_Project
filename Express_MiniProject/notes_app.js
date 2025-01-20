@@ -289,7 +289,20 @@ if (args[0].endsWith("node.exe") && args[1].endsWith("app.js")) {
                     console.log(err);
                 })
             break;
+
+        case "update":
+            console.log(args[3], args[4], args[5]);
+            updateNoteById(args[3], new Note (args[4], args[5]))
+            .then(data =>{
+                console.log(data); 
+            })
+            .catch(err =>{
+                console.log(err);
+            })
     }
 }
 
+console.log("notes_app.js loaded");
 module.exports = { updateNoteById ,addNote, notesList, deleteNote, searchNotes, Note };
+
+
