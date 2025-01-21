@@ -4,7 +4,7 @@ It contains 2 .js files, on the Express_MiniProject folder, **notes_app.js** and
 
 The notes are saved in a json called **notes.json**.
 
-- **notes_app.js** is a command-line note taking.
+- **notes_app.js** is a command-line note taking app.
 
 - **app.js** works as an API using the ExpressJS module, and uses the functionallity of note_app.js.
 
